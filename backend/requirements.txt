@@ -8,3 +8,7 @@ psycopg2-binary
 python-dotenv
 sqlalchemy
 pydantic
+pandas
+matplotlib
+python-multipart
+seaborn

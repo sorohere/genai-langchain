@@ -1,16 +1,26 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from app.agent import get_agent_response
+from app.eda_agent import get_eda_response
 from app.database import init_db, create_session, get_sessions, add_message, get_chat_history, get_database_url, delete_all_sessions
 from sqlalchemy import create_engine, inspect
 from dotenv import load_dotenv
 import os
+import shutil
+import pandas as pd
+import uuid
 
 # Load environment variables
 load_dotenv()
 
 app = FastAPI(title="LangChain SQL Chat API")
+
+# Mount static files for plots
+# Ensure directory exists
+os.makedirs("backend/static/plots", exist_ok=True)
+app.mount("/static", StaticFiles(directory="backend/static"), name="static")
 
 # Configure CORS
 app.add_middleware(
@@ -28,6 +38,12 @@ class ChatRequest(BaseModel):
     session_id: int | None = None
     chatId: str | None = None # For compatibility with new frontend spec
 
+class EdaChatRequest(BaseModel):
+    message: str
+    filename: str
+    google_api_key: str | None = None
+    history: list = []
+
 class InitDbRequest(BaseModel):
     db_uri: str | None = None
 
@@ -38,6 +54,57 @@ class CreateSessionRequest(BaseModel):
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
+
+@app.post("/api/upload_csv")
+async def upload_csv(file: UploadFile = File(...)):
+    try:
+        # Create uploads directory if not exists
+        os.makedirs("backend/uploads", exist_ok=True)
+        
+        # Generate unique filename to prevent overwrites
+        file_ext = os.path.splitext(file.filename)[1]
+        unique_filename = f"{uuid.uuid4()}{file_ext}"
+        file_path = f"backend/uploads/{unique_filename}"
+        
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        # Read CSV to get preview
+        try:
+            df = pd.read_csv(file_path)
+            # Replace NaN and Infinity with None for JSON compatibility
+            import numpy as np
+            df = df.replace({np.nan: None, np.inf: None, -np.inf: None})
+            
+            preview = df.head(5).to_dict(orient="records")
+            columns = list(df.columns)
+            
+            return {
+                "filename": unique_filename,
+                "original_filename": file.filename,
+                "columns": columns,
+                "preview": preview,
+                "row_count": len(df)
+            }
+        except Exception as e:
+            # If reading fails, delete the file
+            os.remove(file_path)
+            raise HTTPException(status_code=400, detail=f"Invalid CSV file: {str(e)}")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/eda_chat")
+async def eda_chat(request: EdaChatRequest):
+    try:
+        api_key = request.google_api_key or os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            raise HTTPException(status_code=400, detail="Google API Key is required")
+            
+        response = get_eda_response(request.message, request.filename, api_key, request.history)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/sessions")
 async def create_new_session(request: CreateSessionRequest):

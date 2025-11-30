@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
 import InputArea from './components/InputArea';
+import EdaWindow from './components/EdaWindow';
 
 function App() {
   // Theme State
@@ -18,6 +19,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [mode, setMode] = useState('chat'); // 'chat' or 'eda'
 
   // Settings
   const dbUri = ''; // Uses backend .env default
@@ -169,18 +171,25 @@ function App() {
             isDark={isDark}
             onNewChat={handleNewChat}
             toggleSidebar={toggleSidebar}
+            mode={mode} // Pass mode to Header
+            setMode={setMode} // Pass setMode to Header
           />
 
           <main className={`flex-1 flex flex-col relative overflow-hidden border-t ${isDark ? 'bg-gradient-to-b from-gray-950/30 to-black/40 border-white/5' : 'bg-gradient-to-b from-gray-100/30 to-white/40 border-gray-400/30'}`}>
-            <ChatWindow messages={messages} isLoading={isLoading} isDark={isDark} />
-
-            <InputArea
-              input={input}
-              setInput={setInput}
-              onSend={handleSendMessage}
-              isLoading={isLoading}
-              isDark={isDark}
-            />
+            {mode === 'chat' ? (
+              <>
+                <ChatWindow messages={messages} isLoading={isLoading} isDark={isDark} />
+                <InputArea
+                  input={input}
+                  setInput={setInput}
+                  onSend={handleSendMessage}
+                  isLoading={isLoading}
+                  isDark={isDark}
+                />
+              </>
+            ) : (
+              <EdaWindow isDark={isDark} />
+            )}
           </main>
         </div>
 
