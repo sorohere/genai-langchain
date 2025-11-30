@@ -111,7 +111,7 @@ const Sidebar = ({ isOpen, onClose, sessions, currentSessionId, onSelectSession,
                                 <div className="pointer-events-auto">
                                     <button
                                         onClick={onClearHistory}
-                                        className={`w-full flex items-center justify-center gap-2 p-2.5 rounded-xl text-sm font-medium transition-all backdrop-blur-xl border shadow-lg ${isDark ? 'bg-gray-900/95 text-red-400 hover:bg-red-950/90 hover:text-red-300 border-red-900/30 hover:border-red-800/50' : 'bg-white/95 text-red-600 hover:bg-red-50/95 hover:text-red-700 border-red-300/40 hover:border-red-400/60'}`}
+                                        className={`w-full flex items-center justify-center gap-2 p-2.5 rounded-xl text-sm font-medium transition-all backdrop-blur-xl border shadow-lg ${isDark ? 'bg-black/95 text-red-400 hover:bg-red-900/80 hover:text-red-300 border-red-900/30 hover:border-red-800/50' : 'bg-gray-100/95 text-red-600 hover:bg-red-50/95 hover:text-red-700 border-red-300/40 hover:border-red-400/60'}`}
                                     >
                                         <Trash2 className="w-4 h-4" /> Clear History
                                     </button>
