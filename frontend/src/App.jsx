@@ -153,10 +153,14 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-black text-gray-900 dark:text-gray-100 font-sans overflow-hidden transition-colors duration-300 items-center justify-center p-4 md:p-8 lg:p-12">
+    <div className="flex h-screen bg-[#0a0a0a] text-gray-100 font-sans overflow-auto items-start justify-center px-4 pt-8 pb-4 md:px-8 md:pt-12 md:pb-8 lg:px-12 lg:pt-16 lg:pb-12 relative">
+
+      {/* Background Blur/Texture Effects */}
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Boxed Layout Container */}
-      <div className="w-full h-full max-w-[1400px] max-h-[900px] bg-white dark:bg-gray-950 rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex relative border border-gray-200 dark:border-gray-800 ring-1 ring-black/5 dark:ring-white/10">
+      <div className="w-full h-[80vh] max-w-[1400px] max-h-[850px] bg-gray-950/90 backdrop-blur-2xl rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex relative border border-white/10 ring-1 ring-white/5 z-10">
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 relative z-0">
