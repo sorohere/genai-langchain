@@ -153,14 +153,14 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen h-screen w-screen bg-[#0a0a0a] text-gray-100 font-sans overflow-hidden flex items-center justify-center relative pt-[400px]">
+    <div className="min-h-screen h-screen w-screen bg-black text-gray-100 font-sans overflow-hidden flex items-center justify-center relative pt-[200px]">
 
-      {/* Background Blur/Texture Effects */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
+      {/* Background Subtle Blur Effects - Black Theme */}
+      <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-gray-900/30 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-gray-800/20 rounded-full blur-[150px] pointer-events-none" />
 
-      {/* Boxed Layout Container */}
-      <div className="w-full h-[75vh] max-w-[1400px] max-h-[700px] bg-gray-950/90 backdrop-blur-2xl rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex relative border border-white/10 ring-1 ring-white/5 z-10">
+      {/* Boxed Layout Container - Glass Morphism with Elevation */}
+      <div className="w-full h-[75vh] max-w-[1400px] max-h-[700px] bg-gradient-to-br from-gray-900/95 via-black/90 to-gray-950/95 backdrop-blur-3xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.05)] overflow-hidden flex relative border border-white/10 ring-1 ring-white/10 z-10">
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 relative z-0">
@@ -171,7 +171,7 @@ function App() {
             toggleSidebar={toggleSidebar}
           />
 
-          <main className="flex-1 flex flex-col relative overflow-hidden bg-white/50 dark:bg-gray-950/50">
+          <main className="flex-1 flex flex-col relative overflow-hidden bg-gradient-to-b from-gray-950/30 to-black/40 border-t border-white/5">
             <ChatWindow messages={messages} isLoading={isLoading} />
 
             <InputArea
