@@ -160,7 +160,7 @@ function App() {
       <div className={`absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full blur-[150px] pointer-events-none ${isDark ? 'bg-gray-800/20' : 'bg-gray-300/30'}`} />
 
       {/* Boxed Layout Container - Glass Morphism with Elevation */}
-      <div className={`w-full h-[75vh] max-w-[1400px] max-h-[700px] backdrop-blur-3xl rounded-3xl overflow-hidden flex relative z-10 ${isDark ? 'bg-gradient-to-br from-gray-900/95 via-black/90 to-gray-950/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.05)] border border-white/10 ring-1 ring-white/10' : 'bg-gradient-to-br from-gray-50/95 via-white/90 to-gray-100/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.05)] border border-gray-300/30 ring-1 ring-gray-200/30'}`}>
+      <div className={`w-full h-[75vh] max-w-[1400px] max-h-[700px] backdrop-blur-3xl rounded-3xl overflow-hidden flex relative z-10 ${isDark ? 'bg-gradient-to-br from-gray-900/95 via-black/90 to-gray-950/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.05)] border border-white/10 ring-1 ring-white/10' : 'bg-gradient-to-br from-gray-50/95 via-white/90 to-gray-100/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.08)] border border-gray-400/40 ring-1 ring-gray-300/40'}`}>
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 relative z-0">
@@ -171,7 +171,7 @@ function App() {
             toggleSidebar={toggleSidebar}
           />
 
-          <main className={`flex-1 flex flex-col relative overflow-hidden border-t ${isDark ? 'bg-gradient-to-b from-gray-950/30 to-black/40 border-white/5' : 'bg-gradient-to-b from-gray-100/30 to-white/40 border-gray-300/20'}`}>
+          <main className={`flex-1 flex flex-col relative overflow-hidden border-t ${isDark ? 'bg-gradient-to-b from-gray-950/30 to-black/40 border-white/5' : 'bg-gradient-to-b from-gray-100/30 to-white/40 border-gray-400/30'}`}>
             <ChatWindow messages={messages} isLoading={isLoading} isDark={isDark} />
 
             <InputArea

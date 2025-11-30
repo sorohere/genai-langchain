@@ -48,12 +48,12 @@ const Sidebar = ({ isOpen, onClose, sessions, currentSessionId, onSelectSession,
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     className={clsx(
                         "fixed inset-y-0 right-0 z-50 w-80 backdrop-blur-2xl border-l shadow-2xl flex flex-col lg:relative lg:translate-x-0 lg:shadow-none lg:z-0 lg:h-full",
-                        isDark ? 'bg-gradient-to-b from-gray-950/95 to-black/95 border-white/10' : 'bg-gradient-to-b from-gray-50/95 to-white/95 border-gray-300/30',
+                        isDark ? 'bg-gradient-to-b from-gray-950/95 to-black/95 border-white/10' : 'bg-gradient-to-b from-gray-50/95 to-white/95 border-gray-400/40',
                         !isOpen && "hidden lg:flex"
                     )}
                 >
                     {/* Header */}
-                    <div className={`flex items-center justify-between p-4 border-b backdrop-blur-sm ${isDark ? 'border-white/5 bg-black/40' : 'border-gray-300/20 bg-gray-100/40'}`}>
+                    <div className={`flex items-center justify-between p-4 border-b backdrop-blur-sm ${isDark ? 'border-white/5 bg-black/40' : 'border-gray-400/30 bg-gray-100/40'}`}>
                         <div className={`flex items-center gap-2 font-semibold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
                             <History className="w-4 h-4" />
                             <span>History</span>
@@ -61,59 +61,64 @@ const Sidebar = ({ isOpen, onClose, sessions, currentSessionId, onSelectSession,
                         <button onClick={onClose} className="lg:hidden"><X className={`w-5 h-5 ${isDark ? 'text-gray-500' : 'text-gray-600'}`} /></button>
                     </div>
 
-                    {/* Content Area */}
-                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                        <div className="space-y-2">
-                            {sessions.map((session) => (
-                                <button
-                                    key={session.id}
-                                    onClick={() => {
-                                        onSelectSession(session.id);
-                                        if (window.innerWidth < 1024) onClose();
-                                    }}
-                                    className={clsx(
-                                        "w-full text-left p-3 rounded-xl flex items-center gap-3 transition-all text-sm group",
-                                        currentSessionId === session.id
-                                            ? isDark
-                                                ? "bg-gray-800/60 text-gray-100 ring-1 ring-white/10 backdrop-blur-sm"
-                                                : "bg-gray-200/60 text-gray-900 ring-1 ring-gray-400/30 backdrop-blur-sm"
-                                            : isDark
-                                                ? "text-gray-400 hover:bg-gray-900/60 hover:text-gray-200 backdrop-blur-sm"
-                                                : "text-gray-600 hover:bg-gray-100/60 hover:text-gray-900 backdrop-blur-sm"
-                                    )}
-                                >
-                                    <MessageSquare className={clsx(
-                                        "w-4 h-4 shrink-0",
-                                        currentSessionId === session.id
-                                            ? isDark ? "text-gray-200" : "text-gray-700"
-                                            : isDark ? "text-gray-500 group-hover:text-gray-300" : "text-gray-500 group-hover:text-gray-700"
-                                    )} />
-                                    <div className="flex-1 min-w-0">
-                                        <p className="truncate font-medium">{session.title || "Untitled Chat"}</p>
-                                        <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{new Date(session.created_at).toLocaleDateString()}</p>
+                    {/* Content Area - Wrapper for content and floating button */}
+                    <div className="flex-1 relative flex flex-col min-h-0">
+                        {/* Scrollable Sessions */}
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-0">
+                            <div className="space-y-2">
+                                {sessions.map((session) => (
+                                    <button
+                                        key={session.id}
+                                        onClick={() => {
+                                            onSelectSession(session.id);
+                                            if (window.innerWidth < 1024) onClose();
+                                        }}
+                                        className={clsx(
+                                            "w-full text-left p-3 rounded-xl flex items-center gap-3 transition-all text-sm group",
+                                            currentSessionId === session.id
+                                                ? isDark
+                                                    ? "bg-gray-800/60 text-gray-100 ring-1 ring-white/10 backdrop-blur-sm"
+                                                    : "bg-gray-200/60 text-gray-900 ring-1 ring-gray-400/30 backdrop-blur-sm"
+                                                : isDark
+                                                    ? "text-gray-400 hover:bg-gray-900/60 hover:text-gray-200 backdrop-blur-sm"
+                                                    : "text-gray-600 hover:bg-gray-100/60 hover:text-gray-900 backdrop-blur-sm"
+                                        )}
+                                    >
+                                        <MessageSquare className={clsx(
+                                            "w-4 h-4 shrink-0",
+                                            currentSessionId === session.id
+                                                ? isDark ? "text-gray-200" : "text-gray-700"
+                                                : isDark ? "text-gray-500 group-hover:text-gray-300" : "text-gray-500 group-hover:text-gray-700"
+                                        )} />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="truncate font-medium">{session.title || "Untitled Chat"}</p>
+                                            <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{new Date(session.created_at).toLocaleDateString()}</p>
+                                        </div>
+                                    </button>
+                                ))}
+                                {sessions.length === 0 && (
+                                    <div className={`text-center text-sm py-12 flex flex-col items-center gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        <MessageSquare className="w-8 h-8 opacity-20" />
+                                        <p>No chat history yet</p>
                                     </div>
-                                </button>
-                            ))}
-                            {sessions.length === 0 && (
-                                <div className={`text-center text-sm py-12 flex flex-col items-center gap-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                    <MessageSquare className="w-8 h-8 opacity-20" />
-                                    <p>No chat history yet</p>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Footer (Clear History) */}
-                    {sessions.length > 0 && (
-                        <div className={`p-4 border-t backdrop-blur-sm ${isDark ? 'border-white/5 bg-black/40' : 'border-gray-300/20 bg-gray-100/40'}`}>
-                            <button
-                                onClick={onClearHistory}
-                                className={`w-full flex items-center justify-center gap-2 p-2.5 rounded-lg text-sm font-medium transition-colors backdrop-blur-sm ${isDark ? 'text-red-400 hover:bg-red-950/30 hover:text-red-300 border border-red-900/20 hover:border-red-800/40' : 'text-red-600 hover:bg-red-100/50 hover:text-red-700 border border-red-300/30 hover:border-red-400/50'}`}
-                            >
-                                <Trash2 className="w-4 h-4" /> Clear History
-                            </button>
-                        </div>
-                    )}
+                        {/* Floating Clear History Button - Content scrolls behind it */}
+                        {sessions.length > 0 && (
+                            <div className="absolute bottom-0 left-0 right-0 p-4 pb-4 pointer-events-none">
+                                <div className="pointer-events-auto">
+                                    <button
+                                        onClick={onClearHistory}
+                                        className={`w-full flex items-center justify-center gap-2 p-2.5 rounded-xl text-sm font-medium transition-all backdrop-blur-xl border shadow-lg ${isDark ? 'bg-gray-900/95 text-red-400 hover:bg-red-950/90 hover:text-red-300 border-red-900/30 hover:border-red-800/50' : 'bg-white/95 text-red-600 hover:bg-red-50/95 hover:text-red-700 border-red-300/40 hover:border-red-400/60'}`}
+                                    >
+                                        <Trash2 className="w-4 h-4" /> Clear History
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </motion.div>
             )}
         </AnimatePresence>

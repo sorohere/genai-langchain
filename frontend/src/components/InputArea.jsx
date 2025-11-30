@@ -21,7 +21,7 @@ const InputArea = ({ input, setInput, onSend, isLoading, isDark }) => {
     return (
         <div className="absolute bottom-0 left-0 right-0 p-4 pb-6 pointer-events-none">
             <div className="max-w-3xl mx-auto pointer-events-auto">
-                <div className={`relative border rounded-3xl focus-within:ring-2 transition-all duration-300 backdrop-blur-xl ${isDark ? 'bg-gradient-to-br from-gray-900/90 to-black/90 border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] focus-within:ring-gray-700/50 focus-within:border-white/30' : 'bg-gradient-to-br from-white/90 to-gray-100/90 border-gray-300/50 shadow-[0_8px_32px_rgba(0,0,0,0.15)] focus-within:ring-gray-400/30 focus-within:border-gray-400/50'}`}>
+                <div className={`relative border rounded-3xl focus-within:ring-2 transition-all duration-300 backdrop-blur-xl ${isDark ? 'bg-gradient-to-br from-gray-900/90 to-black/90 border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] focus-within:ring-gray-700/50 focus-within:border-white/30' : 'bg-gradient-to-br from-white/90 to-gray-100/90 border-gray-400/50 shadow-[0_8px_32px_rgba(0,0,0,0.2)] focus-within:ring-gray-500/40 focus-within:border-gray-500/60'}`}>
                     <form onSubmit={onSend} className="flex items-end gap-2 p-3">
                         <textarea
                             ref={textareaRef}

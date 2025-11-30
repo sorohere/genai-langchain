@@ -3,7 +3,7 @@ import { Database, Plus, Moon, Sun, Menu } from 'lucide-react';
 
 const Header = ({ toggleTheme, isDark, onNewChat, toggleSidebar }) => {
     return (
-        <header className={`sticky top-0 z-30 h-14 border-b backdrop-blur-xl flex items-center justify-between px-4 md:px-6 transition-all duration-300 ${isDark ? 'border-white/10 bg-gray-900/40' : 'border-gray-300/30 bg-gray-100/40'}`}>
+        <header className={`sticky top-0 z-30 h-14 border-b backdrop-blur-xl flex items-center justify-between px-4 md:px-6 transition-all duration-300 ${isDark ? 'border-white/10 bg-gray-900/40' : 'border-gray-400/40 bg-gray-100/40'}`}>
             <div className="flex items-center gap-2.5">
                 <div className={`p-1.5 rounded-lg shadow-sm ring-1 ${isDark ? 'bg-gradient-to-br from-gray-800 to-gray-900 ring-white/10' : 'bg-gradient-to-br from-gray-200 to-gray-300 ring-gray-400/20'}`}>
                     <Database className={`w-5 h-5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`} />
