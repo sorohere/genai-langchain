@@ -8,10 +8,18 @@ html {
 }
 
 body {
-  @apply overflow-hidden bg-black text-white;
+  @apply overflow-hidden;
   height: 100%;
   margin: 0;
   padding: 0;
+}
+
+.dark body {
+  @apply bg-black text-white;
+}
+
+body:not(.dark) {
+  @apply bg-white text-black;
 }
 
 .glass-panel {

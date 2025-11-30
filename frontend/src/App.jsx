@@ -153,14 +153,14 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen h-screen w-screen bg-black text-gray-100 font-sans overflow-hidden flex items-center justify-center relative pt-[200px]">
+    <div className={`min-h-screen h-screen w-screen font-sans overflow-hidden flex items-center justify-center relative pt-[200px] ${isDark ? 'bg-black text-gray-100' : 'bg-white text-gray-900'}`}>
 
-      {/* Background Subtle Blur Effects - Black Theme */}
-      <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-gray-900/30 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-gray-800/20 rounded-full blur-[150px] pointer-events-none" />
+      {/* Background Subtle Blur Effects */}
+      <div className={`absolute top-[-10%] left-[-5%] w-[40%] h-[40%] rounded-full blur-[150px] pointer-events-none ${isDark ? 'bg-gray-900/30' : 'bg-gray-200/40'}`} />
+      <div className={`absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full blur-[150px] pointer-events-none ${isDark ? 'bg-gray-800/20' : 'bg-gray-300/30'}`} />
 
       {/* Boxed Layout Container - Glass Morphism with Elevation */}
-      <div className="w-full h-[75vh] max-w-[1400px] max-h-[700px] bg-gradient-to-br from-gray-900/95 via-black/90 to-gray-950/95 backdrop-blur-3xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.05)] overflow-hidden flex relative border border-white/10 ring-1 ring-white/10 z-10">
+      <div className={`w-full h-[75vh] max-w-[1400px] max-h-[700px] backdrop-blur-3xl rounded-3xl overflow-hidden flex relative z-10 ${isDark ? 'bg-gradient-to-br from-gray-900/95 via-black/90 to-gray-950/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.05)] border border-white/10 ring-1 ring-white/10' : 'bg-gradient-to-br from-gray-50/95 via-white/90 to-gray-100/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.05)] border border-gray-300/30 ring-1 ring-gray-200/30'}`}>
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 relative z-0">
@@ -171,14 +171,15 @@ function App() {
             toggleSidebar={toggleSidebar}
           />
 
-          <main className="flex-1 flex flex-col relative overflow-hidden bg-gradient-to-b from-gray-950/30 to-black/40 border-t border-white/5">
-            <ChatWindow messages={messages} isLoading={isLoading} />
+          <main className={`flex-1 flex flex-col relative overflow-hidden border-t ${isDark ? 'bg-gradient-to-b from-gray-950/30 to-black/40 border-white/5' : 'bg-gradient-to-b from-gray-100/30 to-white/40 border-gray-300/20'}`}>
+            <ChatWindow messages={messages} isLoading={isLoading} isDark={isDark} />
 
             <InputArea
               input={input}
               setInput={setInput}
               onSend={handleSendMessage}
               isLoading={isLoading}
+              isDark={isDark}
             />
           </main>
         </div>
@@ -192,6 +193,7 @@ function App() {
           onSelectSession={setCurrentSessionId}
           onClearHistory={handleClearHistory}
           dbUri={dbUri}
+          isDark={isDark}
         />
       </div>
 
