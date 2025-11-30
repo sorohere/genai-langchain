@@ -64,7 +64,7 @@ const Sidebar = ({ isOpen, onClose, sessions, currentSessionId, onSelectSession,
                     {/* Content Area - Wrapper for content and floating button */}
                     <div className="flex-1 relative flex flex-col min-h-0">
                         {/* Scrollable Sessions */}
-                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-0">
+                        <div className="flex-1 overflow-y-auto p-4 pb-14 custom-scrollbar min-h-0">
                             <div className="space-y-2">
                                 {sessions.map((session) => (
                                     <button
