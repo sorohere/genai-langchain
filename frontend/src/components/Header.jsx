@@ -16,8 +16,8 @@ const Header = ({ toggleTheme, isDark, onNewChat, toggleSidebar, mode, setMode }
                 <button
                     onClick={() => setMode(mode === 'chat' ? 'eda' : 'chat')}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all shadow-sm hover:shadow border active:scale-95 backdrop-blur-sm mr-2 ${isDark
-                            ? 'bg-gray-800/80 hover:bg-gray-700/80 text-gray-100 border-white/10 hover:border-white/20'
-                            : 'bg-gray-200/80 hover:bg-gray-300/80 text-gray-900 border-gray-400/30 hover:border-gray-400/50'
+                        ? 'bg-gray-800/80 hover:bg-gray-700/80 text-gray-100 border-white/10 hover:border-white/20'
+                        : 'bg-gray-200/80 hover:bg-gray-300/80 text-gray-900 border-gray-400/30 hover:border-gray-400/50'
                         }`}
                     title={mode === 'chat' ? "Switch to Data Analysis" : "Switch to SQL Chat"}
                 >
@@ -41,23 +41,6 @@ const Header = ({ toggleTheme, isDark, onNewChat, toggleSidebar, mode, setMode }
                     title="Toggle Theme"
                 >
                     {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                </button>
-
-                <button
-                    onClick={toggleSidebar}
-                    className={`p-2 rounded-lg transition-colors lg:hidden backdrop-blur-sm ${isDark ? 'text-gray-400 hover:bg-gray-800/60 hover:text-gray-200' : 'text-gray-600 hover:bg-gray-200/60 hover:text-gray-900'}`}
-                    title="Toggle Menu"
-                >
-                    <Menu className="w-5 h-5" />
-                </button>
-
-                {/* Desktop Sidebar Toggle */}
-                <button
-                    onClick={toggleSidebar}
-                    className={`hidden lg:block p-2 rounded-lg transition-colors backdrop-blur-sm ${isDark ? 'text-gray-400 hover:bg-gray-800/60 hover:text-gray-200' : 'text-gray-600 hover:bg-gray-200/60 hover:text-gray-900'}`}
-                    title="Toggle Sidebar"
-                >
-                    <Menu className="w-5 h-5" />
                 </button>
             </div>
         </header>

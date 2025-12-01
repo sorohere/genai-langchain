@@ -46,6 +46,7 @@ def planner_stage(llm, user_query, df_info, history=[]):
        - Clear the figure after saving using `plt.clf()` to avoid overlapping plots.
     4. Print any textual answer or summary using `print()`.
     5. Return ONLY the raw Python code. No markdown formatting, no code blocks (```python ... ```).
+    6. When using seaborn plots with a 'palette', you MUST assign the 'x' or 'y' variable to 'hue' and set 'legend=False' to avoid FutureWarnings.
     
     Example Output:
     print(df.describe())

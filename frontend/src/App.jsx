@@ -155,11 +155,16 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen h-screen w-screen font-sans overflow-hidden flex items-center justify-center relative pt-[200px] ${isDark ? 'bg-black text-gray-100' : 'bg-white text-gray-900'}`}>
+    <div className={`min-h-screen h-screen w-screen font-sans overflow-hidden flex items-center justify-center relative pt-[250px] ${isDark ? 'bg-black text-gray-100' : 'bg-white text-gray-900'}`}>
 
       {/* Background Subtle Blur Effects */}
       <div className={`absolute top-[-10%] left-[-5%] w-[40%] h-[40%] rounded-full blur-[150px] pointer-events-none ${isDark ? 'bg-gray-900/30' : 'bg-gray-200/40'}`} />
       <div className={`absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full blur-[150px] pointer-events-none ${isDark ? 'bg-gray-800/20' : 'bg-gray-300/30'}`} />
+
+      {/* Main Heading */}
+      <h1 className={`absolute top-40 left-1/4 -translate-x-1/2 text-8xl font-black tracking-tighter z-0 select-none ${isDark ? 'text-white' : 'text-black'}`}>
+        n3nq
+      </h1>
 
       {/* Boxed Layout Container - Glass Morphism with Elevation */}
       <div className={`w-full h-[75vh] max-w-[1400px] max-h-[700px] backdrop-blur-3xl rounded-3xl overflow-hidden flex relative z-10 ${isDark ? 'bg-gradient-to-br from-gray-900/95 via-black/90 to-gray-950/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.05)] border border-white/10 ring-1 ring-white/10' : 'bg-gradient-to-br from-gray-50/95 via-white/90 to-gray-100/95 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.08)] border border-gray-400/40 ring-1 ring-gray-300/40'}`}>

@@ -23,18 +23,20 @@ const MessageItem = ({ role, content, sqlQuery, results, isDark }) => {
             transition={{ duration: 0.3 }}
             className={clsx(
                 "flex gap-4 w-full",
-                isUser ? "justify-end" : "justify-start"
+                isUser ? "flex-row-reverse" : ""
             )}
         >
-            {/* AI Avatar (Left) */}
-            {!isUser && (
-                <div className={`w-8 h-8 rounded-lg backdrop-blur-sm flex items-center justify-center shrink-0 mt-1 ring-1 ${isDark ? 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 ring-white/10' : 'bg-gradient-to-br from-gray-200/60 to-gray-300/60 ring-gray-400/20'}`}>
+            {/* Avatar (AI or User) */}
+            <div className={`w-8 h-8 rounded-lg backdrop-blur-sm flex items-center justify-center shrink-0 mt-1 ring-1 ${isDark ? 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 ring-white/10' : 'bg-gradient-to-br from-gray-200/60 to-gray-300/60 ring-gray-400/20'}`}>
+                {isUser ? (
+                    <span className={`text-xs font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>U</span>
+                ) : (
                     <Bot className={`w-5 h-5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`} />
-                </div>
-            )}
+                )}
+            </div>
 
             <div className={clsx(
-                "flex flex-col max-w-[85%] md:max-w-[75%]",
+                "flex flex-col max-w-[85%]",
                 isUser ? "items-end" : "items-start"
             )}>
                 {/* Message Bubble / Card */}
@@ -76,7 +78,7 @@ const MessageItem = ({ role, content, sqlQuery, results, isDark }) => {
                     )}
 
                     {/* Results Table (Only for Assistant) */}
-                    {!isUser && results && results.length > 0 && (
+                    {!isUser && results && Array.isArray(results) && results.length > 0 && (
                         <div className={`mb-4 overflow-hidden rounded-lg border backdrop-blur-sm ${isDark ? 'border-white/10 bg-black/40' : 'border-gray-300/30 bg-gray-50/40'}`}>
                             <div className="overflow-x-auto custom-scrollbar">
                                 <table className="w-full text-sm text-left">
@@ -119,11 +121,6 @@ const MessageItem = ({ role, content, sqlQuery, results, isDark }) => {
                     {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
             </div>
-
-            {/* User Avatar (Right) - Optional, usually standard chat apps don't show user avatar next to bubble if it's right aligned, but let's keep it minimal or remove it. 
-                The prompt said "User messages: Right-aligned bubble... AI messages: Left-aligned in a card: Small 'AI' avatar/icon." 
-                It didn't explicitly ask for User avatar. I'll remove User avatar to be cleaner like iMessage/WhatsApp/ChatGPT.
-            */}
         </motion.div>
     );
 };

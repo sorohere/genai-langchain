@@ -12,7 +12,7 @@ const ChatWindow = ({ messages, isLoading, isDark }) => {
 
     return (
         <div className="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth custom-scrollbar">
-            <div className="max-w-3xl mx-auto space-y-6">
+            <div className="w-full space-y-6">
                 {messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4 opacity-0 animate-fade-in-up">
                         <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-4 ring-1 backdrop-blur-sm ${isDark ? 'bg-gradient-to-br from-gray-800/40 to-gray-900/40 ring-white/10' : 'bg-gradient-to-br from-gray-200/40 to-gray-300/40 ring-gray-400/20'}`}>

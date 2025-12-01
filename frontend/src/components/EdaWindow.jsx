@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, FileText, BarChart2, Code, Terminal, Image as ImageIcon, X } from 'lucide-react';
+import { Send, FileText, BarChart2, Code, Terminal, Image as ImageIcon, X, Loader2 } from 'lucide-react';
 import FileUpload from './FileUpload';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -11,6 +11,7 @@ const EdaWindow = ({ isDark }) => {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
+    const textareaRef = useRef(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -19,6 +20,14 @@ const EdaWindow = ({ isDark }) => {
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    // Auto-resize textarea on input change
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 200) + 'px';
+        }
+    }, [input]);
 
     const handleUpload = async (file) => {
         setIsLoading(true);
@@ -36,6 +45,10 @@ const EdaWindow = ({ isDark }) => {
             const data = await response.json();
             setFileData(data);
             setMessages([{
+                role: 'user',
+                type: 'file',
+                fileData: data
+            }, {
                 role: 'assistant',
                 content: `I've loaded **${data.original_filename}** successfully! \n\nIt has **${data.row_count} rows** and **${data.columns.length} columns**. \n\nYou can ask me to analyze this data, create visualizations, or perform statistical tests.`
             }]);
@@ -51,6 +64,11 @@ const EdaWindow = ({ isDark }) => {
         e.preventDefault();
         if (!input.trim() || isLoading) return;
 
+        // Reset height
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+        }
+
         const userMessage = { role: 'user', content: input };
         setMessages(prev => [...prev, userMessage]);
         setInput('');
@@ -63,7 +81,7 @@ const EdaWindow = ({ isDark }) => {
                 body: JSON.stringify({
                     message: userMessage.content,
                     filename: fileData.filename,
-                    history: messages.map(m => ({ role: m.role, content: m.content }))
+                    history: messages.filter(m => !m.type).map(m => ({ role: m.role, content: m.content }))
                 })
             });
 
@@ -107,51 +125,14 @@ const EdaWindow = ({ isDark }) => {
 
     return (
         <div className="flex-1 flex flex-col h-full relative">
-            {/* Data Preview Header */}
-            <div className={`flex-none p-4 border-b backdrop-blur-md z-10 ${isDark ? 'bg-gray-900/60 border-white/10' : 'bg-white/60 border-gray-200'}`}>
-                <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                        <FileText className={`w-5 h-5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
-                        <span className={`font-semibold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-                            {fileData.original_filename}
-                        </span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-600'}`}>
-                            {fileData.row_count} rows
-                        </span>
-                    </div>
-                    <button
-                        onClick={() => setFileData(null)}
-                        className={`text-xs hover:underline ${isDark ? 'text-red-400' : 'text-red-600'}`}
-                    >
-                        Close File
-                    </button>
-                </div>
-
-                {/* Mini Table Preview */}
-                <div className="overflow-x-auto custom-scrollbar">
-                    <table className={`w-full text-xs text-left ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <thead className={`text-xs uppercase ${isDark ? 'bg-gray-800/50 text-gray-400' : 'bg-gray-50 text-gray-500'}`}>
-                            <tr>
-                                {fileData.columns.slice(0, 8).map((col) => (
-                                    <th key={col} className="px-3 py-2 font-medium whitespace-nowrap">{col}</th>
-                                ))}
-                                {fileData.columns.length > 8 && <th className="px-3 py-2">...</th>}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {fileData.preview.map((row, i) => (
-                                <tr key={i} className={`border-b ${isDark ? 'border-white/5 hover:bg-white/5' : 'border-gray-100 hover:bg-gray-50'}`}>
-                                    {fileData.columns.slice(0, 8).map((col) => (
-                                        <td key={`${i}-${col}`} className="px-3 py-1.5 whitespace-nowrap max-w-[150px] truncate">
-                                            {String(row[col])}
-                                        </td>
-                                    ))}
-                                    {fileData.columns.length > 8 && <td className="px-3 py-1.5">...</td>}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+            {/* Header with Close Button Only */}
+            <div className={`flex-none p-4 border-b backdrop-blur-md z-10 flex justify-end ${isDark ? 'bg-gray-900/60 border-white/10' : 'bg-white/60 border-gray-200'}`}>
+                <button
+                    onClick={() => setFileData(null)}
+                    className={`text-xs hover:underline flex items-center gap-1 ${isDark ? 'text-red-400' : 'text-red-600'}`}
+                >
+                    <X className="w-3 h-3" /> Close File
+                </button>
             </div>
 
             {/* Chat Area */}
@@ -168,14 +149,33 @@ const EdaWindow = ({ isDark }) => {
 
                         {/* Message Content */}
                         <div className={`flex flex-col max-w-[85%] gap-2 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                            <div className={`p-4 rounded-2xl prose prose-sm max-w-none dark:prose-invert ${msg.role === 'user'
-                                ? isDark ? 'bg-blue-600/20 text-blue-100' : 'bg-blue-50 text-blue-900'
-                                : isDark ? 'bg-gray-800/60 text-gray-100' : 'bg-white text-gray-900 shadow-sm border border-gray-100'
-                                }`}>
-                                <ReactMarkdown>
-                                    {msg.content}
-                                </ReactMarkdown>
-                            </div>
+
+                            {/* File Card (if message type is 'file') */}
+                            {msg.type === 'file' ? (
+                                <div className={`p-3 rounded-xl border flex items-center gap-3 ${isDark ? 'bg-gray-800/50 border-white/10' : 'bg-white border-gray-200'}`}>
+                                    <div className={`p-2 rounded-lg ${isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
+                                        <FileText className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className={`text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                                            {msg.fileData.original_filename}
+                                        </span>
+                                        <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                            {msg.fileData.row_count} rows • {msg.fileData.columns.length} columns
+                                        </span>
+                                    </div>
+                                </div>
+                            ) : (
+                                /* Normal Text Message */
+                                <div className={`p-4 rounded-2xl prose prose-sm max-w-none dark:prose-invert ${msg.role === 'user'
+                                    ? isDark ? 'bg-blue-600/20 text-blue-100' : 'bg-blue-50 text-blue-900'
+                                    : isDark ? 'bg-gray-800/60 text-gray-100' : 'bg-white text-gray-900 shadow-sm border border-gray-100'
+                                    }`}>
+                                    <ReactMarkdown>
+                                        {Array.isArray(msg.content) ? msg.content.join('') : String(msg.content || '')}
+                                    </ReactMarkdown>
+                                </div>
+                            )}
 
                             {/* Code & Plots (Assistant only) */}
                             {msg.role === 'assistant' && (
@@ -274,27 +274,38 @@ const EdaWindow = ({ isDark }) => {
             {/* Input Area */}
             <div className="absolute bottom-0 left-0 right-0 p-4 pb-6 bg-gradient-to-t from-black/20 to-transparent pointer-events-none">
                 <div className="max-w-3xl mx-auto pointer-events-auto">
-                    <div className={`relative border rounded-3xl focus-within:ring-2 transition-all duration-300 backdrop-blur-xl ${isDark ? 'bg-gray-900/90 border-white/20 shadow-lg focus-within:ring-blue-500/50' : 'bg-white/90 border-gray-300 shadow-lg focus-within:ring-blue-400/50'}`}>
-                        <form onSubmit={handleSend} className="flex items-center gap-2 p-2 pl-4">
-                            <input
-                                type="text"
+                    <div className={`relative border rounded-3xl focus-within:ring-2 transition-all duration-300 backdrop-blur-xl ${isDark ? 'bg-gradient-to-br from-gray-900/90 to-black/90 border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] focus-within:ring-gray-700/50 focus-within:border-white/30' : 'bg-gradient-to-br from-white/90 to-gray-100/90 border-gray-400/50 shadow-[0_8px_32px_rgba(0,0,0,0.2)] focus-within:ring-gray-500/40 focus-within:border-gray-500/60'}`}>
+                        <form onSubmit={handleSend} className="flex items-end gap-2 p-3">
+                            <textarea
+                                ref={textareaRef}
                                 value={input}
-                                onChange={(e) => setInput(e.target.value)}
+                                onChange={(e) => {
+                                    setInput(e.target.value);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSend(e);
+                                    }
+                                }}
                                 placeholder="Ask a question about your data..."
-                                className={`flex-1 bg-transparent border-none focus:ring-0 text-sm ${isDark ? 'text-white placeholder-gray-400' : 'text-gray-900 placeholder-gray-500'}`}
+                                className={`w-full bg-transparent border-none focus:ring-0 resize-none max-h-[200px] min-h-[24px] py-2 px-2 text-base leading-relaxed ${isDark ? 'text-gray-100 placeholder-gray-500' : 'text-gray-900 placeholder-gray-400'}`}
+                                rows={1}
                                 disabled={isLoading}
                             />
                             <button
                                 type="submit"
                                 disabled={!input.trim() || isLoading}
-                                className={`p-2 rounded-full transition-all ${!input.trim() || isLoading
-                                    ? isDark ? 'bg-gray-800 text-gray-500' : 'bg-gray-100 text-gray-400'
-                                    : isDark ? 'bg-blue-600 text-white hover:bg-blue-500' : 'bg-blue-500 text-white hover:bg-blue-600'
-                                    }`}
+                                className={`p-2 rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95 mb-0.5 border backdrop-blur-sm ${isDark ? 'bg-gray-800/90 hover:bg-gray-700/90 text-gray-100 disabled:opacity-50 disabled:hover:bg-gray-800/90 border-white/10' : 'bg-gray-200/90 hover:bg-gray-300/90 text-gray-900 disabled:opacity-50 disabled:hover:bg-gray-200/90 border-gray-400/30'}`}
                             >
-                                <Send className="w-4 h-4" />
+                                {isLoading ? <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Send className="w-5 h-5" />}
                             </button>
                         </form>
+                    </div>
+                    <div className="text-center mt-2">
+                        <p className={`text-[10px] font-medium ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                            Enter to send • Shift+Enter for new line
+                        </p>
                     </div>
                 </div>
             </div>
