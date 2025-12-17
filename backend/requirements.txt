@@ -12,3 +12,4 @@ pandas
 matplotlib
 python-multipart
 seaborn
+tabulate

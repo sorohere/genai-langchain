@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Bot, User, Copy, Check, Terminal } from 'lucide-react';
@@ -112,7 +113,7 @@ const MessageItem = ({ role, content, sqlQuery, results, isDark }) => {
                             ? isDark ? "prose-invert text-gray-100" : "text-gray-900"
                             : isDark ? "prose-invert text-gray-200" : "text-gray-800"
                     )}>
-                        <ReactMarkdown>{content}</ReactMarkdown>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
                     </div>
                 </div>
 

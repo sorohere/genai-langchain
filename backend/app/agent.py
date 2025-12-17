@@ -143,10 +143,21 @@ def responder_stage(llm, user_query, execution_log):
     - If data was retrieved, summarize it or present it clearly.
     - If an action was performed (created table, inserted data), confirm it.
     - If an error occurred, explain it simply.
-    - Use Markdown formatting for tables or lists if appropriate.
+    - Use Markdown formatting for tables or lists if appropriate. 
+    - IMPORTANT: When creating Markdown tables, ensure you put a newline character after every row. Do not collapse rows into a single line.
+    
+    Correct Format:
+    | ID | Name |
+    |---|---|
+    | 1 | Alice |
+    | 2 | Bob |
+
+    Incorrect Format:
+    | ID | Name | |---|---| | 1 | Alice | | 2 | Bob |
     """
     
     response = llm.invoke(prompt)
+    print(f"DEBUG: Raw Responder Output:\n{repr(response.content)}")
     return response.content
 
 def get_agent_response(message: str, db_uri: str, google_api_key: str, history: list = []) -> dict:
