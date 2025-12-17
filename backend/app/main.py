@@ -183,6 +183,10 @@ async def chat(request: ChatRequest):
     try:
         # Use provided values or fallback to environment variables
         api_key = request.google_api_key or os.getenv("GOOGLE_API_KEY")
+        
+        # Set model as requested by user
+        os.environ["GEMINI_MODEL"] = "gemini-2.5-flash-lite-preview-09-2025"
+
         db_uri = request.db_uri or get_database_url()
 
         if not api_key:
