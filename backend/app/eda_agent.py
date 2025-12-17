@@ -82,7 +82,7 @@ def executor_stage(code, df):
     output_buffer = io.StringIO()
     
     # Directory to save final plots
-    final_plot_dir = os.path.abspath("backend/static/plots")
+    final_plot_dir = os.path.abspath("workspace/plots")
     os.makedirs(final_plot_dir, exist_ok=True)
     
     results = {
@@ -174,7 +174,7 @@ def get_eda_response(message: str, filename: str, google_api_key: str, history: 
     )
     
     # Load Dataframe
-    file_path = f"backend/uploads/{filename}"
+    file_path = f"workspace/uploads/{filename}"
     if not os.path.exists(file_path):
         return {
             "answer": "Error: File not found. Please upload the file again.",

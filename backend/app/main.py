@@ -11,16 +11,35 @@ import os
 import shutil
 import pandas as pd
 import uuid
+from contextlib import asynccontextmanager
 
 # Load environment variables
 load_dotenv()
 
-app = FastAPI(title="LangChain SQL Chat API")
+# Workspace Configuration
+WORKSPACE_DIR = "workspace"
+UPLOADS_DIR = f"{WORKSPACE_DIR}/uploads"
+PLOTS_DIR = f"{WORKSPACE_DIR}/plots"
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Create workspace directories
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
+    os.makedirs(PLOTS_DIR, exist_ok=True)
+    print(f"Created workspace at {WORKSPACE_DIR}")
+    yield
+    # Shutdown: Clean up workspace
+    if os.path.exists(WORKSPACE_DIR):
+        shutil.rmtree(WORKSPACE_DIR)
+        print(f"Cleaned up workspace at {WORKSPACE_DIR}")
+
+app = FastAPI(title="LangChain SQL Chat API", lifespan=lifespan)
 
 # Mount static files for plots
-# Ensure directory exists
-os.makedirs("backend/static/plots", exist_ok=True)
-app.mount("/static", StaticFiles(directory="backend/static"), name="static")
+# We mount the plots directory specifically
+# Ensure directory exists before mounting to avoid RuntimeError
+os.makedirs(PLOTS_DIR, exist_ok=True)
+app.mount("/static/plots", StaticFiles(directory=PLOTS_DIR), name="static_plots")
 
 # Configure CORS
 app.add_middleware(
@@ -58,13 +77,13 @@ async def health_check():
 @app.post("/api/upload_csv")
 async def upload_csv(file: UploadFile = File(...)):
     try:
-        # Create uploads directory if not exists
-        os.makedirs("backend/uploads", exist_ok=True)
+        # Ensure uploads directory exists (redundant but safe)
+        os.makedirs(UPLOADS_DIR, exist_ok=True)
         
         # Generate unique filename to prevent overwrites
         file_ext = os.path.splitext(file.filename)[1]
         unique_filename = f"{uuid.uuid4()}{file_ext}"
-        file_path = f"backend/uploads/{unique_filename}"
+        file_path = f"{UPLOADS_DIR}/{unique_filename}"
         
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
@@ -88,7 +107,8 @@ async def upload_csv(file: UploadFile = File(...)):
             }
         except Exception as e:
             # If reading fails, delete the file
-            os.remove(file_path)
+            if os.path.exists(file_path):
+                os.remove(file_path)
             raise HTTPException(status_code=400, detail=f"Invalid CSV file: {str(e)}")
             
     except Exception as e:
