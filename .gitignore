@@ -58,5 +58,3 @@ Thumbs.db
 backend/.env
 backend/venv/
 backend/__pycache__/
-
-zeno
