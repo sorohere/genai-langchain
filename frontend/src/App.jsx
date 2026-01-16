@@ -66,15 +66,41 @@ function App() {
     setIsLoading(true);
     try {
       const response = await axios.get(`http://localhost:8000/api/sessions/${sessionId}/messages`);
-      const formattedMessages = response.data.messages.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
+      const formattedMessages = response.data.messages.map(msg => {
+        let content = msg.content;
+        let extra = {};
+        // Try to parse JSON content for EDA responses
+        if (msg.role === 'assistant' && typeof content === 'string' && content.trim().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(content);
+            if (parsed.answer) {
+              content = parsed.answer;
+              extra = parsed;
+            }
+          } catch (e) {
+            // Not JSON or failed to parse, keep as string
+          }
+        }
+        return {
+          role: msg.role,
+          content: content,
+          ...extra
+        };
+      });
       setMessages(formattedMessages);
     } catch (error) {
       console.error("Failed to fetch messages", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSelectSession = (session) => {
+    setCurrentSessionId(session.id);
+    if (session.session_type === 'eda') {
+      setMode('eda');
+    } else {
+      setMode('chat');
     }
   };
 
@@ -193,7 +219,21 @@ function App() {
                 />
               </>
             ) : (
-              <EdaWindow isDark={isDark} />
+              (() => {
+                const activeSession = sessions.find(s => s.id === currentSessionId);
+                console.log("App.jsx sending to EdaWindow:", { currentSessionId, activeSession, sessions });
+                return (
+                  <EdaWindow
+                    isDark={isDark}
+                    session={activeSession}
+                    initialMessages={messages}
+                    onSessionCreate={(newSession) => {
+                      setSessions([newSession, ...sessions]);
+                      setCurrentSessionId(newSession.id);
+                    }}
+                  />
+                );
+              })()
             )}
           </main>
         </div>
@@ -204,7 +244,7 @@ function App() {
           onClose={() => setIsSidebarOpen(false)}
           sessions={sessions}
           currentSessionId={currentSessionId}
-          onSelectSession={setCurrentSessionId}
+          onSelectSession={handleSelectSession}
           onClearHistory={handleClearHistory}
           dbUri={dbUri}
           isDark={isDark}

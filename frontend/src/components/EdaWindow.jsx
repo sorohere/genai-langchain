@@ -5,7 +5,8 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, coy } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-const EdaWindow = ({ isDark }) => {
+const EdaWindow = ({ isDark, session, initialMessages = [], onSessionCreate }) => {
+    console.log("EdaWindow received session:", session);
     const [fileData, setFileData] = useState(null);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
@@ -16,6 +17,32 @@ const EdaWindow = ({ isDark }) => {
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
+
+    // Sync messages from props
+    useEffect(() => {
+        if (session && initialMessages) {
+            setMessages(initialMessages);
+        } else if (!session) {
+            setMessages([]);
+        }
+    }, [session, initialMessages]);
+
+    // Sync fileData from session
+    useEffect(() => {
+        if (session && session.filename) {
+            // Restore minimal fileData if not already set or if different
+            if (!fileData || fileData.filename !== session.filename) {
+                setFileData({
+                    filename: session.filename,
+                    original_filename: session.filename, // We might want to store original name separately in DB if needed
+                    row_count: 'Unknown', // We don't have this in session meta yet
+                    columns: []
+                });
+            }
+        } else if (!session) {
+            setFileData(null);
+        }
+    }, [session]);
 
     useEffect(() => {
         scrollToBottom();
@@ -40,21 +67,52 @@ const EdaWindow = ({ isDark }) => {
                 body: formData,
             });
 
-            if (!response.ok) throw new Error('Upload failed');
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Server responded with ${response.status}: ${errorText}`);
+            }
 
             const data = await response.json();
             setFileData(data);
-            setMessages([{
-                role: 'user',
-                type: 'file',
-                fileData: data
-            }, {
-                role: 'assistant',
-                content: `I've loaded **${data.original_filename}** successfully! \n\nIt has **${data.row_count} rows** and **${data.columns.length} columns**. \n\nYou can ask me to analyze this data, create visualizations, or perform statistical tests.`
-            }]);
+
+            // Create a new session for this file
+            try {
+                const sessionRes = await fetch('http://localhost:8000/api/sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: `Analysis: ${data.original_filename}`,
+                        session_type: 'eda',
+                        filename: data.filename
+                    })
+                });
+                const newSession = await sessionRes.json();
+
+                if (onSessionCreate) {
+                    onSessionCreate(newSession);
+                }
+
+                // Initial message
+                const welcomeMsg = {
+                    role: 'assistant',
+                    content: `I've loaded **${data.original_filename}** successfully! \n\nIt has **${data.row_count} rows** and **${data.columns.length} columns**. \n\nYou can ask me to analyze this data, create visualizations, or perform statistical tests.`
+                };
+
+                // Add welcome message to DB (optional, but good for history)
+                // Note: We don't have add_message endpoint exposed directly, but we could use /api/eda_chat with special flag or just rely on local state until user types?
+                // Better: The user didn't type anything yet. Let's just set local state. 
+                // Actual persistence will start when user sends a message.
+                // OR: We can just let the Welcome message be ephemeral ? 
+                // Let's keep it ephemeral locally for now.
+                setMessages([welcomeMsg]);
+
+            } catch (err) {
+                console.error("Failed to create session", err);
+            }
+
         } catch (error) {
             console.error('Upload error:', error);
-            alert('Failed to upload file');
+            alert(`Failed to upload file: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -81,6 +139,7 @@ const EdaWindow = ({ isDark }) => {
                 body: JSON.stringify({
                     message: userMessage.content,
                     filename: fileData.filename,
+                    session_id: session ? session.session_id : (session ? session.id : null), // Handle both id and session_id format
                     history: messages.filter(m => !m.type).map(m => ({ role: m.role, content: m.content }))
                 })
             });

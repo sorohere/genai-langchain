@@ -29,9 +29,12 @@ async def lifespan(app: FastAPI):
     print(f"Created workspace at {WORKSPACE_DIR}")
     yield
     # Shutdown: Clean up workspace
-    if os.path.exists(WORKSPACE_DIR):
-        shutil.rmtree(WORKSPACE_DIR)
-        print(f"Cleaned up workspace at {WORKSPACE_DIR}")
+    # We DO NOT want to delete the workspace on shutdown because it deletes uploaded files
+    # that are needed for persistent EDA sessions.
+    # if os.path.exists(WORKSPACE_DIR):
+    #     shutil.rmtree(WORKSPACE_DIR)
+    #     print(f"Cleaned up workspace at {WORKSPACE_DIR}")
+    print("Shutdown: Workspace preserved.")
 
 app = FastAPI(title="LangChain SQL Chat API", lifespan=lifespan)
 
@@ -61,6 +64,7 @@ class EdaChatRequest(BaseModel):
     message: str
     filename: str
     google_api_key: str | None = None
+    session_id: int | None = None
     history: list = []
 
 class InitDbRequest(BaseModel):
@@ -69,6 +73,8 @@ class InitDbRequest(BaseModel):
 class CreateSessionRequest(BaseModel):
     title: str = "New Chat"
     db_uri: str | None = None
+    session_type: str = "sql"
+    filename: str | None = None
 
 @app.get("/health")
 async def health_check():
@@ -121,7 +127,30 @@ async def eda_chat(request: EdaChatRequest):
         if not api_key:
             raise HTTPException(status_code=400, detail="Google API Key is required")
             
-        response = get_eda_response(request.message, request.filename, api_key, request.history)
+        db_uri = get_database_url()
+        history = []
+        if request.session_id and db_uri:
+             history = get_chat_history(db_uri, request.session_id)
+        else:
+             history = request.history
+            
+        response = get_eda_response(request.message, request.filename, api_key, history)
+        
+        # Save to history if session_id is provided
+        if request.session_id and db_uri:
+            add_message(db_uri, request.session_id, "user", request.message)
+            
+            # Serialize the rich response
+            import json
+            rich_content = {
+                "answer": response["answer"],
+                "code": response["code"],
+                "stdout": response["stdout"],
+                "plots": response["plots"],
+                "error": response["error"]
+            }
+            add_message(db_uri, request.session_id, "assistant", json.dumps(rich_content))
+            
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -132,8 +161,14 @@ async def create_new_session(request: CreateSessionRequest):
         db_uri = request.db_uri or get_database_url()
         if not db_uri:
             raise HTTPException(status_code=400, detail="Database URI required")
-        session_id = create_session(db_uri, request.title)
-        return {"session_id": session_id, "title": request.title}
+        session_id = create_session(db_uri, request.title, request.session_type, request.filename)
+        return {
+            "id": session_id,  # Standardize on "id" to match get_sessions
+            "session_id": session_id, # Keep for backward compat if needed, but primary is id
+            "title": request.title,
+            "session_type": request.session_type,
+            "filename": request.filename
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

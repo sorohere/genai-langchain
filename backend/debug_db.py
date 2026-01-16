@@ -21,6 +21,11 @@ try:
             print("chat_sessions table exists.")
             result = connection.execute(text("SELECT count(*) FROM chat_sessions"))
             print(f"Session count: {result.scalar()}")
+            
+            print("Columns in chat_sessions:")
+            columns = inspector.get_columns('chat_sessions')
+            for col in columns:
+                print(f"- {col['name']} ({col['type']})")
         else:
             print("chat_sessions table MISSING!")
 

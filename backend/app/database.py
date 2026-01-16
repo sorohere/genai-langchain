@@ -29,9 +29,18 @@ def init_db(db_uri: str):
             CREATE TABLE IF NOT EXISTS chat_sessions (
                 id SERIAL PRIMARY KEY,
                 title VARCHAR(200),
+                session_type VARCHAR(20) DEFAULT 'sql',
+                filename VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """))
+
+        # Migration: Add columns if they don't exist
+        try:
+            connection.execute(text("ALTER TABLE chat_sessions ADD COLUMN IF NOT EXISTS session_type VARCHAR(20) DEFAULT 'sql'"))
+            connection.execute(text("ALTER TABLE chat_sessions ADD COLUMN IF NOT EXISTS filename VARCHAR(255)"))
+        except Exception as e:
+            print(f"Migration notice: {e}")
 
         connection.execute(text("""
             CREATE TABLE IF NOT EXISTS chat_messages (
@@ -70,15 +79,16 @@ def init_db(db_uri: str):
             print("Database already contains data.")
             connection.commit()
 
-def create_session(db_uri: str, title: str = "New Chat"):
+def create_session(db_uri: str, title: str = "New Chat", session_type: str = "sql", filename: str = None):
     engine = create_engine(db_uri)
     with engine.connect() as conn:
-        # Check current session count
-        result = conn.execute(text("SELECT id FROM chat_sessions ORDER BY created_at ASC"))
+        # Check current session count for this type
+        result = conn.execute(text(
+            "SELECT id FROM chat_sessions WHERE session_type = :type ORDER BY created_at ASC"
+        ), {"type": session_type})
         sessions = [row[0] for row in result]
         
-        # If we have 5 or more sessions, delete the oldest ones until we have 4
-        # so that adding the new one brings us to 5.
+        # Limit to 5 sessions per type
         if len(sessions) >= 5:
             # Calculate how many to delete
             num_to_delete = len(sessions) - 4
@@ -91,8 +101,8 @@ def create_session(db_uri: str, title: str = "New Chat"):
             
         # Create new session
         result = conn.execute(text(
-            "INSERT INTO chat_sessions (title) VALUES (:title) RETURNING id"
-        ), {"title": title})
+            "INSERT INTO chat_sessions (title, session_type, filename) VALUES (:title, :type, :filename) RETURNING id"
+        ), {"title": title, "type": session_type, "filename": filename})
         session_id = result.scalar()
         conn.commit()
         return session_id
@@ -101,7 +111,7 @@ def get_sessions(db_uri: str):
     engine = create_engine(db_uri)
     with engine.connect() as conn:
         result = conn.execute(text(
-            "SELECT id, title, created_at FROM chat_sessions ORDER BY created_at DESC"
+            "SELECT id, title, session_type, filename, created_at FROM chat_sessions ORDER BY created_at DESC"
         ))
         return [dict(row._mapping) for row in result]
 

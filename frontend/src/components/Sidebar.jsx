@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Trash2, X, History } from 'lucide-react';
+import { MessageSquare, Trash2, X, History, BarChart2 } from 'lucide-react';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -70,7 +70,7 @@ const Sidebar = ({ isOpen, onClose, sessions, currentSessionId, onSelectSession,
                                     <button
                                         key={session.id}
                                         onClick={() => {
-                                            onSelectSession(session.id);
+                                            onSelectSession(session);
                                             if (window.innerWidth < 1024) onClose();
                                         }}
                                         className={clsx(
@@ -84,12 +84,21 @@ const Sidebar = ({ isOpen, onClose, sessions, currentSessionId, onSelectSession,
                                                     : "text-gray-600 hover:bg-gray-100/60 hover:text-gray-900 backdrop-blur-sm"
                                         )}
                                     >
-                                        <MessageSquare className={clsx(
-                                            "w-4 h-4 shrink-0",
-                                            currentSessionId === session.id
-                                                ? isDark ? "text-gray-200" : "text-gray-700"
-                                                : isDark ? "text-gray-500 group-hover:text-gray-300" : "text-gray-500 group-hover:text-gray-700"
-                                        )} />
+                                        {session.session_type === 'eda' ? (
+                                            <BarChart2 className={clsx(
+                                                "w-4 h-4 shrink-0",
+                                                currentSessionId === session.id
+                                                    ? isDark ? "text-purple-400" : "text-purple-600"
+                                                    : isDark ? "text-gray-500 group-hover:text-purple-400" : "text-gray-500 group-hover:text-purple-600"
+                                            )} />
+                                        ) : (
+                                            <MessageSquare className={clsx(
+                                                "w-4 h-4 shrink-0",
+                                                currentSessionId === session.id
+                                                    ? isDark ? "text-gray-200" : "text-gray-700"
+                                                    : isDark ? "text-gray-500 group-hover:text-gray-300" : "text-gray-500 group-hover:text-gray-700"
+                                            )} />
+                                        )}
                                         <div className="flex-1 min-w-0">
                                             <p className="truncate font-medium">{session.title || "Untitled Chat"}</p>
                                             <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{new Date(session.created_at).toLocaleDateString()}</p>
