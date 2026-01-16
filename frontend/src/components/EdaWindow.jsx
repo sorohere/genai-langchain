@@ -14,6 +14,8 @@ const EdaWindow = ({ isDark, session, initialMessages = [], onSessionCreate }) =
     const messagesEndRef = useRef(null);
     const textareaRef = useRef(null);
 
+    const [selectedImage, setSelectedImage] = useState(null);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
@@ -26,6 +28,17 @@ const EdaWindow = ({ isDark, session, initialMessages = [], onSessionCreate }) =
             setMessages([]);
         }
     }, [session, initialMessages]);
+
+    // Handle Escape key to close lightbox
+    useEffect(() => {
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                setSelectedImage(null);
+            }
+        };
+        window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+    }, []);
 
     // Sync fileData from session
     useEffect(() => {
@@ -282,7 +295,10 @@ const EdaWindow = ({ isDark, session, initialMessages = [], onSessionCreate }) =
                                             {msg.plots.map((plot, i) => (
                                                 <div key={i} className={`group relative flex items-center gap-3 p-2 pr-4 rounded-xl border transition-all hover:shadow-md ${isDark ? 'bg-gray-800/50 border-white/10 hover:bg-gray-800' : 'bg-white border-gray-200 hover:border-gray-300'}`}>
                                                     {/* Thumbnail */}
-                                                    <div className="w-16 h-16 shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+                                                    <div
+                                                        className="w-16 h-16 shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 cursor-zoom-in"
+                                                        onClick={() => setSelectedImage(`http://localhost:8000${plot}`)}
+                                                    >
                                                         <img
                                                             src={`http://localhost:8000${plot}`}
                                                             alt="Plot Thumbnail"
@@ -368,6 +384,29 @@ const EdaWindow = ({ isDark, session, initialMessages = [], onSessionCreate }) =
                     </div>
                 </div>
             </div>
+
+            {/* Image Lightbox */}
+            {selectedImage && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in duration-200"
+                    onClick={() => setSelectedImage(null)}
+                >
+                    <div className="relative max-w-[90vw] max-h-[90vh]">
+                        <button
+                            onClick={() => setSelectedImage(null)}
+                            className="absolute -top-12 right-0 p-2 text-white/70 hover:text-white transition-colors"
+                        >
+                            <X className="w-8 h-8" />
+                        </button>
+                        <img
+                            src={selectedImage}
+                            alt="Full screen plot"
+                            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking image
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -105,12 +105,17 @@ function App() {
   };
 
   const handleNewChat = async () => {
+    // If the current session is empty (no messages), just clear input and don't create a new one yet
+    if (currentSessionId && messages.length === 0) {
+      return;
+    }
+
     try {
       const response = await axios.post('http://localhost:8000/api/sessions', {
         title: `New Chat ${new Date().toLocaleTimeString()}`
       });
       setSessions([response.data, ...sessions]);
-      setCurrentSessionId(response.data.session_id);
+      setCurrentSessionId(response.data.id); // Use standard 'id'
       // On mobile, close sidebar after creating new chat
       if (window.innerWidth < 1024) setIsSidebarOpen(false);
     } catch (error) {
